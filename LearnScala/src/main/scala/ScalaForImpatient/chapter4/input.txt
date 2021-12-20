@@ -1,0 +1,200 @@
+Home
+File Input
+Just as simple input is more complex than simple output, file input is more complex than file output. Python handling of file input is much better than many other programming languages. As a result, file input using plain text files in Python is actually fairly straightforward.
+
+Reading in plain text files
+Plain text files are files that store their information with a limited amount of formatting. The main formatting used in a plain text file are characters that are used to separate the pieces of data from each other. These characters are generally of two types:
+
+Line separators - newline characters ('\n') used to separate one line of data from another line.
+Delimiters - commas (',') and tabs ('\t') used to separate pieces of data on the same line. In the past, the vertical bar ('|') was also commonly used as a delimiter.
+Examples of plain text files
+Commonly used plain text files are:
+
+CSV - Comma separated value files. These are commonly used for import and export by spreadsheet programs.
+Tab-delimited text files. These are also commonly used for import and export by spreadsheet programs. These are preferred over CSV files if a piece of data can contain a comma.
+Reading in data from a file with line separated data
+Suppose you had a club that had a list of members stored in a text file. We want to write a program that will print a simple greeting for each member. Before we do that, let's look at the input file, "members.txt":
+
+Jane Doe
+John Doe
+Bill Gates
+Eric Raymond
+Here is a program that reads this file in, and prints a simple greeting to each member:
+
+infile = open("members.txt","r")
+lines = infile.readlines()
+infile.close()
+for line in lines:
+    print("Welcome",line)
+On line 1, we use the open() function to open the file named "members.txt" in a read-only fashion, and assign the file handle to the variable infile. The first argument to the open() function is the filename. The second argument to the open() function is the file mode. In this case, the "r" means that we are opening the file for read-only purposes.
+
+Line 2 calls the readlines() function. This function reads in all the lines from the file and stores each line as an element in a list. In this case we are calling this list lines. Since we are done reading in all the lines from the file, we close the file handle on line 3.
+
+Since lines is a list, we process lines using a for loop. Since we are going to treat each element in that list the same, we use a for-each style for loop. On line 5, we just print the literal string "Welcome" followed by the element from the lines list. Here is the output from a sample run:
+
+$ python greet_members.py
+Welcome Jane Doe
+
+Welcome John Doe
+
+Welcome Bill Gates
+
+Welcome Eric Raymond
+Note that there is a blank line in between each greeting. This is because when the lines list was created, each of the elements comes from a line in the input file. Each of those lines has a newline ('\n') character on the end, and this is what causes the extra blank lines. If you wanted to remove the newline characters, you could just use line.strip() instead of line on line 5 of the program.
+
+Reading files with multiple pieces of data on each line
+It is common in file input with plain text files, to have each line consist of more than one piece of data. Let's look at an input file that has data like this. Here is the file, "students.txt":
+
+Jane Doe,80,90,94
+John Doe,75,77,76
+Bill Gates,50,70,90
+Eric Raymond,90,93,90
+This file has the students name followed by three exam scores. We want to process the file so that when our program is run, it produces the following output:
+
+Jane Doe has an average of:  88.0
+John Doe has an average of:  76.0
+Bill Gates has an average of:  70.0
+Eric Raymond has an average of:  91.0
+To make this work, we need to use the split() function on each line, so that we can separate the name from the scores, and the scores from each other. Keep in mind that split() creates a list of strings, so some of those strings need to be converted into numbers so that they can be treated as scores. Here is the code for the program:
+
+infile = open("students.txt","r")
+lines = infile.readlines()
+infile.close()
+for line in lines:
+    tokens = line.split(",")
+    total = 0
+    for i in range(1, len(tokens)):
+        total = total + float(tokens[i])
+    average = total/(len(tokens) - 1)
+    print(tokens[0],"has an average of: ",average)
+Line 1 opens "students.txt" for reading and stores the file handle as infile. Line 2 reads all the lines from infile and stores them in a list called lines. Line 3 closes the file handle.
+
+Lines 4-10 define the for loop that iterates over all the lines. Since we want to do the same thing for each line, we use a for-each style loop for the main loop. Line 5 splits each line using a comma, and stores the resulting list of string as tokens. The variable name, tokens, is chosen as breaking apart a string to analyze the pieces of that string is called tokenizing.
+
+Lines 6-8 carry out the accumulator pattern to obtain the total of the scores. Note that we don't treat each of the elements in the tokens list the same; we don't want to treat the first element as a score. This is why, on line 7, we use an index-based for loop. On line 8, we convert the element into a number (since split() always creates a list of strings) before adding it to the total.
+
+Line 9 obtains the average. Note that we divide by one less than the number of tokens, since the first token is the student's name, not a score. Finally, on line 10, the student's name is printed followed by "has an average of" and then the average.
+
+You can imagine that a simple grading program could be created by extending what we have done here.
+
+The readline() and read() functions
+There are two other functions that can be used to read from a file handle that has been connected to a file that is open for reading. These are the readline() and read() functions.
+
+readline()
+The readline() function reads a single line from the file and advances the line pointer by one line. It is possible to call readline() over and over until the whole file is read in, one line at a time. Usually the readline() function is used when you only want to read a single line from the file, because that line contains header information for example.
+
+Consider a text file named "data.txt" that has the following contents:
+
+First Name,Last Name,Major
+Jane,Doe,CENT
+John,Doe,PHYS
+Bill,Gates,ICS
+Eric,Raymond,MATH
+This could be processed by the following program to produce some HTML output:
+
+infile = open("data.txt","r")
+line1 = infile.readline()
+lines = infile.readlines()
+infile.close()
+outfile = open("data.html","w")
+outfile.write("<html>\n  <body>\n")
+outfile.write('    <table border="1">\n')
+outfile.write('      <tr>\n')
+headers = line1.strip().split(",")
+outfile.write('        ')
+for header in headers:
+    outfile.write('<td>' + header + '</td> ')
+outfile.write('\n      </tr>\n')
+for line in lines:
+    tokens = line.strip().split(",")
+    outfile.write('      <tr>\n')
+    outfile.write('        ')
+    for token in tokens:
+        outfile.write('<td>' + token + '</td> ')
+    outfile.write('\n      </tr>\n')
+outfile.write('    </table>\n')
+outfile.write('  </body>\n</html>')
+outfile.close()
+Line 2 reads the first line of the input file into the variable line1. Line 3 reads the rest of the lines from the input file and stores this in the list called lines.
+
+Lines 5-9 open the file "data.html" for writing and write the lines to create a <body> element inside a <html> element. Then, the beginning of a <table> element is written to the output file. Line 9 strips the first line from the file and splits this using a comma to create the headers list. That list is used on lines 11-12 to complete the header row for the table.
+
+Lines 14-20 process the rest of the lines of the file to become the table data. The output file, "data.html" has the following contents:
+
+<html>
+  <body>
+    <table border="1">
+      <tr>
+        <td>First Name</td> <td>Last Name</td> <td>Major</td>
+      </tr>
+      <tr>
+        <td>Jane</td> <td>Doe</td> <td>CENT</td>
+      </tr>
+      <tr>
+        <td>John</td> <td>Doe</td> <td>PHYS</td>
+      </tr>
+      <tr>
+        <td>Bill</td> <td>Gates</td> <td>ICS</td>
+      </tr>
+      <tr>
+        <td>Eric</td> <td>Raymond</td> <td>MATH</td>
+      </tr>
+    </table>
+  </body>
+</html>
+read()
+The read() functions reads in the entire contents of the file as a single string. The read() function will be used when parsing JSON files. The read() function will also be used if parsing HTML or XML files using BeautifulSoup.
+
+Combining file input with file output
+Once you are able to do both file input and file output, you are able to do two kinds of processes that have great practical value:
+
+Perform file conversion from one format to another format.
+Break a large programming problem into several smaller programs with the output of the first program becoming the input to the second program, etc.
+File conversion
+The programming example showing the use of the readline() function is an example of file conversion. The input file was a CSV (comma-separated value) file, and the output file was formatted as a HTML file.
+
+Breaking a large problem into several smaller problems
+Suppose you had some data that required three sequential steps to process that data. You could write one program that would read the data and perform the first processing step and save the processed data to an output file. The second program could take the output file from the first program as input and perform the second processing step on the data. The output from the second program would become the input for the third program. Finally, the third program performs the final processing. Breaking what would be one large program into the three programs would make the programs smaller and easier to write/debug. This would also allow for different programmers to work on the different programs at the same time.
+
+File input - self-test
+Here are a few questions on file input that you can use to test your understanding.
+
+Question 1
+Write a program that can process the following input file, "students1.txt":
+
+Doe,Jane,CENT
+Doe,John,PHYS
+Gates,Bill,ICS
+Raymond,Eric,MATH
+You want your program to produce the following output to the screen, when your program is run:
+
+Jane Doe is a CENT major.
+John Doe is a PHYS major.
+Bill Gates is a ICS major.
+Eric Raymond is a MATH major.
+Show
+Question 2
+Write a program that can process the following input file, "customers.txt". This file has a the customer's last name, first name and prices of items they purchased in the last period all separated by commas.
+
+Doe,Jane,48.35,65.99,21.39
+Doe,John,11.39,12.49,1.05
+Gates,Bill,1034.49,1164.89,575.99
+You want your program to produce the following output to the screen, when your program is run:
+
+Jane Doe spent an average of: $45.24
+John Doe spent an average of: $8.31
+Bill Gates spent an average of: $925.12
+Show
+Question 3
+Write a program that can process the following input file, "scores.txt". This file has a the student's name, followed by his/her exam scores. The student's don't all have the same number of exams.
+
+Jane,94,91,92
+John,78,88,72
+Bill,50,100
+You want your program to produce the following output to the screen, when your program is run:
+
+Jane average score is: 92.33
+John average score is: 79.33
+Bill average score is: 75.00
+Show
+Home
